@@ -11,7 +11,7 @@ set -vx
 wget -qO- uny.nu/pkg | bash -s buildsys
 
 ### Installing build dependencies
-#unyp install python expat openssl
+unyp install python/2.7.18
 
 #pip3_bin=(/uny/pkg/python/*/bin/pip3)
 #"${pip3_bin[0]}" install --upgrade pip
@@ -35,7 +35,7 @@ mkdir -pv /uny/sources
 cd /uny/sources || exit
 
 pkgname="libinjection"
-pkggit="https://github.com/libinjection/libinjection.git refs/tags/*"
+pkggit="https://github.com/client9/libinjection.git refs/tags/*"
 gitdepth="--depth=1"
 
 ### Get version info from git remote
@@ -77,12 +77,14 @@ get_include_paths
 
 unset LD_RUN_PATH
 
-./configure \
-    --prefix=/uny/pkg/"$pkgname"/"$pkgver"
+cd src || exit
+sed "s|PREFIX=.*|PREFIX=/uny/pkg/$pkgname/$pkgver|" -i Makefile
 
 make -j"$(nproc)"
-make -j"$(nproc)" check 
+make -j"$(nproc)" check
+ranlib libinjection.a
 make -j"$(nproc)" install
+cp -a libinjection.so /uny/pkg/$pkgname/$pkgver/lib
 
 ####################################################
 ### End of individual build script
